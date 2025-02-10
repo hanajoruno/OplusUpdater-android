@@ -1,0 +1,3 @@
+[submodule "OplusUpdater"]
+	path = OplusUpdater
+	url = https://github.com/Houvven/OplusUpdater.git
