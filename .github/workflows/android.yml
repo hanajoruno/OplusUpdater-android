@@ -37,7 +37,7 @@ jobs:
         run: |
           pwd
           tree
-          gomobile bind -target=android -androidapi 26 -v ./OplusUpdater/pkg/updater
+          gomobile bind -target=android -androidapi 26 -v OplusUpdater/pkg/updater
 
       - name: set up JDK 17
         uses: actions/setup-java@v4
