@@ -51,9 +51,16 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew assemble
 
-      - name: Upload a Build Artifact
+      - name: Upload Release Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: apk-files
-          path: app/build/outputs/apk/**/*.apk
+          name: apk-files-release
+          path: app/build/outputs/apk/release
+          if-no-files-found: error
+
+      - name: Upload Debug Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-files-debug
+          path: app/build/outputs/apk/debug
           if-no-files-found: error
