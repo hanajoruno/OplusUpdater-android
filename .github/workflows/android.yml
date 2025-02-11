@@ -1,0 +1,66 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Set up golang/mobile
+        run: |
+          go install golang.org/x/mobile/cmd/gomobile@latest
+
+      - name: Set up Android NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r26d
+          local-cache: true
+
+      - name: Build go bindings
+        working-directory: OplusUpdater
+        run: |
+          pwd
+          gomobile init
+          gomobile bind -target=android -androidapi 26 -v ./pkg/updater
+
+      - name: set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew assemble
+
+      - name: Upload Release Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-files-release
+          path: app/build/outputs/apk/release
+          if-no-files-found: error
+
+      - name: Upload Debug Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-files-debug
+          path: app/build/outputs/apk/debug
+          if-no-files-found: error
