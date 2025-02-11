@@ -37,7 +37,7 @@ jobs:
         run: |
           pwd
           gomobile init
-          gomobile bind -target=android -androidapi 26 -v pkg/updater
+          gomobile bind -target=android -androidapi 26 -v ./pkg/updater
 
       - name: set up JDK 17
         uses: actions/setup-java@v4
