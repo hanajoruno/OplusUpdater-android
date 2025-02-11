@@ -36,7 +36,7 @@ jobs:
       - name: Build go bindings
         run: |
           pwd
-          ls -la
+          tree
           gomobile bind -target=android -androidapi 26 -v ./OplusUpdater/pkg/updater
 
       - name: set up JDK 17
