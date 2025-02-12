@@ -1,6 +1,8 @@
 package com.houvven.oplusupdater.ui.screen.home
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import androidx.annotation.Keep
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
@@ -17,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -39,11 +42,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.extra.SuperDropdown
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.icons.GitHub
+import top.yukonga.miuix.kmp.icon.icons.Info
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import updater.Updater.queryUpdaterRawBytes
 
@@ -96,7 +104,22 @@ fun HomeScreen() {
     }
 
     Scaffold(
-        topBar = { SmallTopAppBar(title = "Updater") },
+        topBar = {
+            SmallTopAppBar(
+                title = "Updater",
+                actions = {
+                    IconButton(onClick = {
+                        val repoUrl = "https://github.com/houvven/OplusUpdater-android"
+                        Intent(Intent.ACTION_VIEW, Uri.parse(repoUrl)).let(context::startActivity)
+                    }) {
+                        Icon(
+                            imageVector = MiuixIcons.GitHub,
+                            contentDescription = null
+                        )
+                    }
+                }
+            )
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
