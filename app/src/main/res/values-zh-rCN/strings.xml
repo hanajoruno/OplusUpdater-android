@@ -22,4 +22,5 @@
     <string name="msg_query_success">查询成功！</string>
     <string name="version_type">类型</string>
     <string name="version_name">版本名</string>
+    <string name="proxy">代理</string>
 </resources>
