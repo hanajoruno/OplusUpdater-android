@@ -81,7 +81,7 @@ val systemOtaVersion: String by lazy {
 @Composable
 fun HomeScreen() {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope { Dispatchers.Default }
+    val coroutineScope = rememberCoroutineScope { Dispatchers.IO }
     val scrollState = rememberScrollState()
 
     var otaVersion by rememberSaveable { mutableStateOf(systemOtaVersion) }
