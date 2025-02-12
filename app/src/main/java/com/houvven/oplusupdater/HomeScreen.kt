@@ -3,16 +3,12 @@ package com.houvven.oplusupdater
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
-import android.webkit.WebView
-import android.widget.Toast
+import androidx.annotation.Keep
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -23,15 +19,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -40,7 +33,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -57,7 +49,6 @@ import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.extra.SuperDialog
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import updater.Updater.queryUpdaterRawBytes
@@ -69,6 +60,7 @@ enum class OtaPacketStatus {
     Testing
 }
 
+@Keep
 enum class OtaZone(
     @StringRes val strRes: Int,
 ) {
@@ -85,7 +77,6 @@ val systemOtaVersion: String by lazy {
     method.invoke(clazz, "ro.build.version.ota", "") as String
 }
 
-@OptIn(ExperimentalSerializationApi::class)
 @Composable
 fun HomeScreen() {
     val context = LocalContext.current
@@ -137,7 +128,7 @@ fun HomeScreen() {
             ) {
                 SuperDropdown(
                     title = stringResource(R.string.region),
-                    items = OtaZone.entries.map { it.name },
+                    items = OtaZone.entries.map { stringResource(it.strRes) },
                     selectedIndex = OtaZone.entries.indexOf(otaZone)
                 ) {
                     otaZone = OtaZone.entries[it]
@@ -158,7 +149,7 @@ fun HomeScreen() {
                     response = null
                     val attr = updater.Attribute().also {
                         it.otaVer = otaVersion
-                        it.zone = otaZone.name.lowercase()
+                        it.zone = otaZone.name
                         it.mode = otaMode.ordinal.toLong()
                     }
                     try {
@@ -188,7 +179,7 @@ fun HomeScreen() {
             }
 
             AnimatedVisibility(visible = response != null) {
-                UpdaterQueryResponseCard(response!!)
+                response?.let { UpdaterQueryResponseCard(it) }
             }
         }
     }
