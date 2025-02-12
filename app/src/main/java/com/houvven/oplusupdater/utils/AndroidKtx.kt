@@ -1,4 +1,4 @@
-package com.houvven.oplusupdater
+package com.houvven.oplusupdater.utils
 
 import android.content.Context
 import android.widget.Toast

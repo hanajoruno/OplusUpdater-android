@@ -1,8 +1,6 @@
-package com.houvven.oplusupdater
+package com.houvven.oplusupdater.ui.screen.home
 
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.net.Uri
 import androidx.annotation.Keep
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
@@ -25,35 +23,30 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.houvven.oplusupdater.R
+import com.houvven.oplusupdater.ui.screen.home.components.UpdateQueryResponseCard
+import com.houvven.oplusupdater.utils.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
-import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import updater.Updater.queryUpdaterRawBytes
 
-private const val Unknown = "Unknown"
 
 enum class OtaPacketStatus {
     Published,
@@ -100,7 +93,6 @@ fun HomeScreen() {
             }
         }
     }
-
 
     Scaffold(
         topBar = { SmallTopAppBar(title = "Updater") },
@@ -179,108 +171,7 @@ fun HomeScreen() {
             }
 
             AnimatedVisibility(visible = response != null) {
-                response?.let { UpdaterQueryResponseCard(it) }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalSerializationApi::class)
-@Composable
-private fun UpdaterQueryResponseCard(
-    responseBytes: ByteArray
-) {
-    val context = LocalContext.current
-    val clipboardManager = LocalClipboardManager.current
-
-    val json = Json { ignoreUnknownKeys = true }
-    val response = json.decodeFromStream<UpdaterQueryResponse>(responseBytes.inputStream())
-
-    if (response.components == null) {
-        return
-    }
-
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Card {
-            SuperArrow(
-                title = stringResource(R.string.status),
-                summary = response.status
-            )
-            response.description.panelUrl.let {
-                SuperArrow(
-                    title = stringResource(R.string.updatelog),
-                    summary = response.description.panelUrl,
-                    onClick = {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
-                        context.startActivity(intent)
-                    }
-                )
-            }
-            response.realAndroidVersion?.let {
-                SuperArrow(
-                    title = stringResource(R.string.android_version),
-                    summary = it.ifBlank { Unknown }
-                )
-            }
-            response.realOsVersion?.let {
-                SuperArrow(
-                    title = stringResource(R.string.os_version),
-                    summary = it.ifBlank { Unknown }
-                )
-            }
-            response.realOtaVersion?.let {
-                SuperArrow(
-                    title = stringResource(R.string.ota_version),
-                    summary = it.ifBlank { Unknown }
-                )
-            }
-            response.securityPatch?.let {
-                SuperArrow(
-                    title = stringResource(R.string.security_patch),
-                    summary = it.ifBlank { Unknown }
-                )
-            }
-        }
-
-        response.components.forEach { component ->
-            val componentPackets = component?.componentPackets
-            if (componentPackets != null) {
-                val size = componentPackets.size.toDoubleOrNull()
-                    ?.div(1024 * 1024 * 1024)
-                    ?.let { "%.3f".format(it) + " GB" }
-
-                Card {
-                    SuperArrow(
-                        title = stringResource(R.string.packet_name),
-                        summary = component.componentName
-                    )
-                    SuperArrow(
-                        title = stringResource(R.string.packet_size),
-                        summary = size
-                    )
-                    componentPackets.manualUrl.let {
-                        SuperArrow(
-                            title = stringResource(R.string.packet_url),
-                            summary = it,
-                            onClick = {
-                                clipboardManager.setText(AnnotatedString(it))
-                                context.toast(R.string.copied)
-                            }
-                        )
-                    }
-                    componentPackets.md5.let {
-                        SuperArrow(
-                            title = stringResource(R.string.packet_md5),
-                            summary = it,
-                            onClick = {
-                                clipboardManager.setText(AnnotatedString(it))
-                                context.toast(R.string.copied)
-                            }
-                        )
-                    }
-                }
+                response?.let { UpdateQueryResponseCard(it) }
             }
         }
     }
