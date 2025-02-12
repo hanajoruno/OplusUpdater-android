@@ -174,13 +174,11 @@ fun HomeScreen() {
                         it.mode = otaMode.ordinal.toLong()
                         it.proxyStr = proxy
                     }
-                    try {
-                        response = queryUpdaterRawBytes(attr).takeIf { it.isNotEmpty() }
-                        coroutineScope.launch {
+                    coroutineScope.launch {
+                        try {
+                            response = queryUpdaterRawBytes(attr).takeIf { it.isNotEmpty() }
                             errMsgFlow.emit(context.getString(R.string.msg_query_success))
-                        }
-                    } catch (e: Exception) {
-                        coroutineScope.launch {
+                        } catch (e: Exception) {
                             errMsgFlow.emit(e.message ?: e.stackTraceToString())
                         }
                     }
