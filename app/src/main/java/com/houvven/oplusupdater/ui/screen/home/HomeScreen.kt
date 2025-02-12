@@ -79,6 +79,7 @@ fun HomeScreen() {
     var otaVersion by rememberSaveable { mutableStateOf(systemOtaVersion) }
     var otaZone by rememberSaveable { mutableStateOf(OtaZone.CN) }
     var otaMode by rememberSaveable { mutableStateOf(OtaPacketStatus.Published) }
+    var proxy by rememberSaveable { mutableStateOf("") }
     var response by rememberSaveable { mutableStateOf<ByteArray?>(null) }
     val errMsgFlow = MutableSharedFlow<String>()
 
@@ -112,6 +113,11 @@ fun HomeScreen() {
                 onValueChange = { otaVersion = it.trim() },
                 label = stringResource(R.string.ota_version),
             )
+            TextField(
+                value = proxy,
+                onValueChange = { proxy = it.trim() },
+                label = stringResource(R.string.proxy)
+            )
 
             Column(
                 modifier = Modifier
@@ -143,6 +149,7 @@ fun HomeScreen() {
                         it.otaVer = otaVersion
                         it.zone = otaZone.name
                         it.mode = otaMode.ordinal.toLong()
+                        it.proxyStr = proxy
                     }
                     try {
                         response = queryUpdaterRawBytes(attr).takeIf { it.isNotEmpty() }
