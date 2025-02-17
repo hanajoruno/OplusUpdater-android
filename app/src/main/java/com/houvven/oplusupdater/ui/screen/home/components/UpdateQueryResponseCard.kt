@@ -91,11 +91,11 @@ fun UpdateQueryResponseCard(
             )
             SuperArrowWrapper(
                 title = stringResource(R.string.android_version),
-                summary = androidVersion ?: realAndroidVersion
+                summary = realAndroidVersion ?: androidVersion
             )
             SuperArrowWrapper(
                 title = stringResource(R.string.os_version),
-                summary = osVersion ?: realOsVersion ?: colorOSVersion
+                summary = realOsVersion ?: colorOSVersion ?: osVersion
             )
             SuperArrowWrapper(
                 title = stringResource(R.string.security_patch),
@@ -104,7 +104,7 @@ fun UpdateQueryResponseCard(
             SuperArrowWrapper(
                 title = stringResource(R.string.published_time),
                 summary = publishedTime?.let {
-                    SimpleDateFormat("yyyy/MM/DD HH:mm:ss", Locale.getDefault())
+                    SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())
                         .format(Date(it))
                 }
             )
