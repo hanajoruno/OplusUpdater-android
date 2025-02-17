@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -51,7 +50,6 @@ import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.GitHub
-import top.yukonga.miuix.kmp.icon.icons.Info
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import updater.Updater.queryUpdaterRawBytes
 
@@ -78,13 +76,17 @@ val systemOtaVersion: String by lazy {
     method.invoke(clazz, "ro.build.version.ota", "") as String
 }
 
+val simpleSystemOtaVersion : String by lazy {
+    systemOtaVersion.split(".").dropLast(1).joinToString(".")
+}
+
 @Composable
 fun HomeScreen() {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope { Dispatchers.IO }
     val scrollState = rememberScrollState()
 
-    var otaVersion by rememberSaveable { mutableStateOf(systemOtaVersion) }
+    var otaVersion by rememberSaveable { mutableStateOf(simpleSystemOtaVersion) }
     var otaZone by rememberSaveable { mutableStateOf(OtaZone.CN) }
     var otaMode by rememberSaveable { mutableStateOf(OtaPacketStatus.Published) }
     var proxy by rememberSaveable { mutableStateOf("") }
