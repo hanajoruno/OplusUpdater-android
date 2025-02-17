@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">OplusUpdater</string>
+    <string name="app_name" translatable="false">Updater</string>
     <string name="ota_version">OTA Version</string>
     <string name="region">Region</string>
     <string name="mode">Mode</string>
