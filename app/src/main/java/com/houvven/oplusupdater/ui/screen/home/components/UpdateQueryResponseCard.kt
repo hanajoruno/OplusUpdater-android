@@ -1,20 +1,25 @@
 package com.houvven.oplusupdater.ui.screen.home.components
 
-import android.content.Intent
-import android.net.Uri
+import android.content.ClipData
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.toClipEntry
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.houvven.oplusupdater.R
 import com.houvven.oplusupdater.domain.UpdateQueryResponse
 import com.houvven.oplusupdater.utils.StorageUnitUtil
 import com.houvven.oplusupdater.utils.toast
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import top.yukonga.miuix.kmp.basic.BasicComponentColors
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
@@ -27,7 +32,7 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun SuperArrowWrapper(
+private fun SuperArrowWrapper(
     title: String,
     modifier: Modifier = Modifier,
     titleColor: BasicComponentColors = BasicComponentDefaults.titleColor(),
@@ -73,7 +78,10 @@ fun UpdateQueryResponseCard(
     modifier: Modifier = Modifier
 ) = with(response) {
     val context = LocalContext.current
-    val clipboardManager = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
+
+    var showUpdateLogDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier,
@@ -112,8 +120,7 @@ fun UpdateQueryResponseCard(
                 title = stringResource(R.string.update_log),
                 summary = description?.panelUrl,
                 onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(description?.panelUrl))
-                    context.startActivity(intent)
+                    showUpdateLogDialog = true
                 }
             )
         }
@@ -133,7 +140,9 @@ fun UpdateQueryResponseCard(
                         title = stringResource(R.string.packet_url),
                         summary = componentPackets.url,
                         onClick = {
-                            clipboardManager.setText(AnnotatedString(it))
+                            coroutineScope.launch {
+                                clipboard.setClipEntry(ClipData.newPlainText(it, it).toClipEntry())
+                            }
                             context.toast(R.string.copied)
                         }
                     )
@@ -143,12 +152,22 @@ fun UpdateQueryResponseCard(
                         title = stringResource(R.string.packet_md5),
                         summary = componentPackets.md5,
                         onClick = {
-                            clipboardManager.setText(AnnotatedString(it))
+                            coroutineScope.launch {
+                                clipboard.setClipEntry(ClipData.newPlainText(it, it).toClipEntry())
+                            }
                             context.toast(R.string.copied)
                         }
                     )
                 }
             }
         }
+    }
+
+    if (showUpdateLogDialog) {
+        UpdateLogDialog(
+            url = description!!.panelUrl!!,
+            softwareVersion = versionName ?: "Only god known it.",
+            onDismissRequest = { showUpdateLogDialog = false }
+        )
     }
 }

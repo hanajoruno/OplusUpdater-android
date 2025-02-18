@@ -24,4 +24,5 @@
     <string name="version_type">Type</string>
     <string name="version_name">Version Name</string>
     <string name="proxy">Proxy</string>
+    <string name="software_version">Software version</string>
 </resources>
