@@ -8,6 +8,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.graphics.Color
 import com.houvven.oplusupdater.ui.screen.home.HomeScreen
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 
 private val lightColor = lightColorScheme(
@@ -15,9 +16,9 @@ private val lightColor = lightColorScheme(
     disabledPrimaryButton = Color(0xff8891da),
 )
 
-private val darkColor = lightColorScheme(
+private val darkColor = darkColorScheme(
     primary = Color(0xff3544c6),
-    disabledPrimaryButton = Color(0xff7276a3),
+    disabledPrimaryButton = Color(0xff7276a3)
 )
 
 
@@ -26,8 +27,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val isDarkMode = isSystemInDarkTheme()
             MiuixTheme(
-                colors = if (isSystemInDarkTheme()) darkColor else lightColor
+                colors = if (isDarkMode) darkColor else lightColor
             ) {
                 HomeScreen()
             }
