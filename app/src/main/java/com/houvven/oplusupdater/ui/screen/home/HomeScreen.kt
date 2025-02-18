@@ -52,12 +52,6 @@ import top.yukonga.miuix.kmp.icon.icons.Info
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import updater.Updater.queryUpdaterRawBytes
 
-
-enum class OtaPacketStatus {
-    Published,
-    Testing
-}
-
 @Keep
 enum class OtaZone(
     @StringRes val strRes: Int,
@@ -88,7 +82,6 @@ fun HomeScreen() {
 
     var otaVersion by rememberSaveable { mutableStateOf(simpleSystemOtaVersion) }
     var otaZone by rememberSaveable { mutableStateOf(OtaZone.CN) }
-    var otaMode by rememberSaveable { mutableStateOf(OtaPacketStatus.Published) }
     var proxy by rememberSaveable { mutableStateOf("") }
     var response by rememberSaveable { mutableStateOf<ByteArray?>(null) }
     val errMsgFlow = MutableSharedFlow<String>()
@@ -155,15 +148,6 @@ fun HomeScreen() {
                 ) {
                     otaZone = OtaZone.entries[it]
                 }
-
-                SuperDropdown(
-                    modifier = Modifier,
-                    title = stringResource(R.string.mode),
-                    items = OtaPacketStatus.entries.map { it.name },
-                    selectedIndex = OtaPacketStatus.entries.indexOf(otaMode)
-                ) {
-                    otaMode = OtaPacketStatus.entries[it]
-                }
             }
 
             Button(
@@ -172,7 +156,6 @@ fun HomeScreen() {
                     val attr = updater.Attribute().also {
                         it.otaVer = otaVersion
                         it.zone = otaZone.name
-                        it.mode = otaMode.ordinal.toLong()
                         it.proxyStr = proxy
                     }
                     coroutineScope.launch {
