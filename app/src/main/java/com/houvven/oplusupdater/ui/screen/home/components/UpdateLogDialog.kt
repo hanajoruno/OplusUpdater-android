@@ -60,7 +60,7 @@ fun UpdateLogDialog(
                 evaluateJavascript(
                     """
                          (function() {
-                             window.HeytapTheme = { isNight: function() { return true; } };
+                             window.HeytapTheme = { isNight: function() { return $isDarkTheme; } };
                          })();
                     """.trimIndent(), null
                 )
@@ -107,7 +107,7 @@ fun UpdateLogDialog(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
                     .background(if (isDarkTheme) Color(0xFF404040) else MiuixTheme.colorScheme.surface),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -145,7 +145,7 @@ fun UpdateLogDialog(
 
                 AndroidView(
                     factory = { webView },
-                    modifier = Modifier.wrapContentSize()
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         }
