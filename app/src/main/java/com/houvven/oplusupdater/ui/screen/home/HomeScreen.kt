@@ -1,8 +1,6 @@
 package com.houvven.oplusupdater.ui.screen.home
 
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.net.Uri
 import androidx.annotation.Keep
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
@@ -32,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.houvven.oplusupdater.R
+import com.houvven.oplusupdater.ui.screen.home.components.AboutInfoDialog
 import com.houvven.oplusupdater.ui.screen.home.components.UpdateQueryResponseCard
 import com.houvven.oplusupdater.utils.toast
 import kotlinx.coroutines.Dispatchers
@@ -49,7 +48,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.icons.GitHub
+import top.yukonga.miuix.kmp.icon.icons.Info
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import updater.Updater.queryUpdaterRawBytes
 
@@ -76,7 +75,7 @@ val systemOtaVersion: String by lazy {
     method.invoke(clazz, "ro.build.version.ota", "") as String
 }
 
-val simpleSystemOtaVersion : String by lazy {
+val simpleSystemOtaVersion: String by lazy {
     systemOtaVersion.split(".").dropLast(1).joinToString(".")
 }
 
@@ -85,6 +84,7 @@ fun HomeScreen() {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope { Dispatchers.IO }
     val scrollState = rememberScrollState()
+    var showAboutInfoDialog by rememberSaveable { mutableStateOf(false) }
 
     var otaVersion by rememberSaveable { mutableStateOf(simpleSystemOtaVersion) }
     var otaZone by rememberSaveable { mutableStateOf(OtaZone.CN) }
@@ -111,11 +111,10 @@ fun HomeScreen() {
                 title = "Updater",
                 actions = {
                     IconButton(onClick = {
-                        val repoUrl = "https://github.com/houvven/OplusUpdater-android"
-                        Intent(Intent.ACTION_VIEW, Uri.parse(repoUrl)).let(context::startActivity)
+                        showAboutInfoDialog = true
                     }) {
                         Icon(
-                            imageVector = MiuixIcons.GitHub,
+                            imageVector = MiuixIcons.Info,
                             contentDescription = null
                         )
                     }
@@ -202,6 +201,12 @@ fun HomeScreen() {
 
             AnimatedVisibility(visible = response != null) {
                 response?.let { UpdateQueryResponseCard(it) }
+            }
+
+            if (showAboutInfoDialog) {
+                AboutInfoDialog(
+                    onDismissRequest = { showAboutInfoDialog = false }
+                )
             }
         }
     }
