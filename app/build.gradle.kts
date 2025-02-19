@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material.icons.extended)
     implementation(libs.miuix)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

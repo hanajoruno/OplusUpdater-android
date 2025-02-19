@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
-import android.webkit.WebViewClient
+import androidx.annotation.Keep
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,6 +41,8 @@ import androidx.compose.ui.zIndex
 import com.houvven.oplusupdater.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import java.net.HttpURLConnection
@@ -89,14 +93,15 @@ fun UpdateLogDialog(
             ) {
                 Column(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .padding(horizontal = 26.dp)
                         .padding(top = 24.dp)
-                        .zIndex(1f)
+                        .zIndex(1f),
                 ) {
                     Text(
                         text = stringResource(R.string.software_version),
                         style = TextStyle(
-                            fontSize = 20.sp,
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.W500,
                             color = MiuixTheme.colorScheme.onSurface
                         )
@@ -105,11 +110,12 @@ fun UpdateLogDialog(
                     Text(
                         text = softwareVersion,
                         style = TextStyle(
-                            fontSize = 16.sp,
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.W500,
                             color = if (isDarkTheme) Color.Gray else Color.DarkGray
                         )
                     )
+
                     Box(
                         modifier = Modifier
                             .padding(vertical = 16.dp)
@@ -124,15 +130,28 @@ fun UpdateLogDialog(
                         WebView(it).apply {
                             setBackgroundColor(Color.Transparent.toArgb())
                             // @formatter:off
-                            addJavascriptInterface(object { @JavascriptInterface fun isNight(): Boolean = isDarkTheme }, "HeytapTheme")
+                            addJavascriptInterface(object { @JavascriptInterface @Keep @Suppress("unused") fun isNight(): Boolean = isDarkTheme }, "HeytapTheme")
                             // @formatter:on
                             settings.javaScriptEnabled = true
                         }
                     },
-                    modifier = Modifier.fillMaxSize(),
                     update = {
                         it.loadDataWithBaseURL(url, responseHtml, "text/html", "utf-8", null)
                     }
+                )
+            }
+
+            IconButton(
+                onClick = onDismissRequest,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(12.dp),
+                backgroundColor = MiuixTheme.colorScheme.secondaryContainer
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                    tint = MiuixTheme.colorScheme.onSecondaryContainer
                 )
             }
         }
