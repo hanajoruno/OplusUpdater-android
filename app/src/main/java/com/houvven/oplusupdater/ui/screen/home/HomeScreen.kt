@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -77,6 +78,7 @@ val simpleSystemOtaVersion: String by lazy {
 @Composable
 fun HomeScreen() {
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val coroutineScope = rememberCoroutineScope { Dispatchers.IO }
     val scrollState = rememberScrollState()
     var showAboutInfoDialog by remember { mutableStateOf(false) }
@@ -153,7 +155,7 @@ fun HomeScreen() {
 
             Button(
                 onClick = {
-                    response = null
+                    focusManager.clearFocus()
                     val attr = updater.Attribute().also {
                         it.otaVer = otaVersion
                         it.zone = otaZone.name
@@ -161,6 +163,7 @@ fun HomeScreen() {
                     }
                     coroutineScope.launch {
                         try {
+                            response = null
                             response = queryUpdaterRawBytes(attr).takeIf { it.isNotEmpty() }
                             errMsgFlow.emit(context.getString(R.string.msg_query_success))
                         } catch (e: Exception) {
