@@ -163,11 +163,10 @@ fun UpdateQueryResponseCard(
         }
     }
 
-    if (showUpdateLogDialog) {
-        UpdateLogDialog(
-            url = description!!.panelUrl!!,
-            softwareVersion = versionName ?: "Only god known it.",
-            onDismissRequest = { showUpdateLogDialog = false }
-        )
-    }
+    UpdateLogDialog(
+        show = showUpdateLogDialog,
+        url = description!!.panelUrl!!,
+        softwareVersion = versionName ?: "Only god known it.",
+        onDismissRequest = { showUpdateLogDialog = false }
+    )
 }
