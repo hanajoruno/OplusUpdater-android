@@ -22,16 +22,24 @@ data class UpdateQueryResponse(
     val decentralize: Decentralize? = null,
     @SerialName("description")
     val description: Description? = null,
+    @SerialName("features")
+    val features: Features? = null,
+    @SerialName("gkaReq")
+    val gkaReq: Int? = null,
     @SerialName("googlePatchInfo")
     val googlePatchInfo: String? = null,
     @SerialName("id")
     val id: String? = null,
+    @SerialName("isConfidential")
+    val isConfidential: Int? = null,
     @SerialName("isNvDescription")
     val isNvDescription: Boolean? = null,
     @SerialName("isRecruit")
     val isRecruit: Boolean? = null,
     @SerialName("isSecret")
     val isSecret: Boolean? = null,
+    @SerialName("isV5GkaVersion")
+    val isV5GkaVersion: Int? = null,
     @SerialName("nightUpdateLimit")
     val nightUpdateLimit: String? = null,
     @SerialName("noticeType")
@@ -39,7 +47,7 @@ data class UpdateQueryResponse(
     @SerialName("nvId16")
     val nvId16: String? = null,
     @SerialName("opexInfo")
-    val opexInfo: List<java.io.Serializable>? = null,
+    val opexInfo: List<OpexInfo?>? = null,
     @SerialName("osVersion")
     val osVersion: String? = null,
     @SerialName("otaVersion")
@@ -145,16 +153,51 @@ data class UpdateQueryResponse(
         val opex: Opex? = null,
         @SerialName("panelUrl")
         val panelUrl: String? = null,
-        @SerialName("firstTitle")
-        val firstTitle: String? = null,
         @SerialName("share")
         val share: String? = null,
         @SerialName("url")
         val url: String? = null
     ) {
         @Serializable
-        class Opex
+        data class Opex(
+            @SerialName("content")
+            val content: String? = null,
+            @SerialName("title")
+            val title: String? = null
+        )
     }
+
+    @Serializable
+    data class Features(
+        @SerialName("featureName")
+        val featureName: String? = null,
+        @SerialName("message")
+        val message: List<Message?>? = null,
+        @SerialName("url")
+        val url: String? = null
+    ) {
+        @Serializable
+        data class Message(
+            @SerialName("backgroundColor")
+            val backgroundColor: String? = null,
+            @SerialName("content")
+            val content: String? = null,
+            @SerialName("order")
+            val order: Int? = null,
+            @SerialName("title")
+            val title: String? = null,
+            @SerialName("url")
+            val url: String? = null
+        )
+    }
+
+    @Serializable
+    data class OpexInfo(
+        @SerialName("aid")
+        val aid: String? = null,
+        @SerialName("versionCode")
+        val versionCode: String? = null
+    )
 
     @Serializable
     data class ReminderValue(
