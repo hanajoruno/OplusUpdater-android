@@ -63,13 +63,19 @@ fun UpdateQueryResponseCard(
     responseBytes: ByteArray,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val respStr = responseBytes.decodeToString()
-    val json = Json { ignoreUnknownKeys = true }
-    val resp = json.decodeFromString<UpdateQueryResponse>(respStr)
-    UpdateQueryResponseCard(
-        modifier = modifier,
-        response = resp
-    )
+    runCatching {
+        val json = Json { ignoreUnknownKeys = true }
+        json.decodeFromString<UpdateQueryResponse>(respStr)
+    }.onFailure {
+        context.toast(it.stackTraceToString())
+    }.onSuccess {
+        UpdateQueryResponseCard(
+            modifier = modifier,
+            response = it
+        )
+    }
 }
 
 @Composable
