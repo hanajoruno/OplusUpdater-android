@@ -27,9 +27,44 @@ import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.extra.RightActionColors
 import top.yukonga.miuix.kmp.extra.SuperArrow
 import top.yukonga.miuix.kmp.extra.SuperArrowDefaults
+import updater.ResponseResult
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
+@Composable
+fun UpdateQueryResponseCard(
+    response: ResponseResult,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+
+    if (response.responseCode.toInt() != 200) {
+        Card {
+            SuperArrowWrapper(
+                title = "status",
+                summary = response.responseCode.toString()
+            )
+            SuperArrowWrapper(
+                title = "message",
+                summary = response.errMsg
+            )
+        }
+        return
+    }
+
+    runCatching {
+        val json = Json { ignoreUnknownKeys = true }
+        json.decodeFromString<UpdateQueryResponse>(response.decryptedBodyBytes.decodeToString())
+    }.onSuccess {
+        UpdateQueryResponseCardContent(
+            modifier = modifier,
+            response = it
+        )
+    }.onFailure {
+        it.message?.let(context::toast)
+    }
+}
 
 @Composable
 private fun SuperArrowWrapper(
@@ -59,29 +94,9 @@ private fun SuperArrowWrapper(
 }
 
 @Composable
-fun UpdateQueryResponseCard(
-    responseBytes: ByteArray,
-    modifier: Modifier = Modifier
-) {
-    val context = LocalContext.current
-    val respStr = responseBytes.decodeToString()
-    runCatching {
-        val json = Json { ignoreUnknownKeys = true }
-        json.decodeFromString<UpdateQueryResponse>(respStr)
-    }.onFailure {
-        context.toast(it.stackTraceToString())
-    }.onSuccess {
-        UpdateQueryResponseCard(
-            modifier = modifier,
-            response = it
-        )
-    }
-}
-
-@Composable
-fun UpdateQueryResponseCard(
+private fun UpdateQueryResponseCardContent(
+    modifier: Modifier = Modifier,
     response: UpdateQueryResponse,
-    modifier: Modifier = Modifier
 ) = with(response) {
     val context = LocalContext.current
     val clipboard = LocalClipboard.current
@@ -169,10 +184,12 @@ fun UpdateQueryResponseCard(
         }
     }
 
-    UpdateLogDialog(
-        show = showUpdateLogDialog,
-        url = description!!.panelUrl!!,
-        softwareVersion = versionName ?: "Only god known it.",
-        onDismissRequest = { showUpdateLogDialog = false }
-    )
+    description?.panelUrl?.let {
+        UpdateLogDialog(
+            show = showUpdateLogDialog,
+            url = it,
+            softwareVersion = versionName ?: "Only god known it.",
+            onDismissRequest = { showUpdateLogDialog = false }
+        )
+    }
 }

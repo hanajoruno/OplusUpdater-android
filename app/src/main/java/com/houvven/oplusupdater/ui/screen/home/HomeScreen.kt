@@ -52,10 +52,11 @@ import top.yukonga.miuix.kmp.extra.SuperDropdown
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.icons.Info
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import updater.Updater.queryUpdaterRawBytes
+import updater.ResponseResult
+import updater.Updater
 
 @Keep
-enum class OtaZone(
+enum class OtaRegion(
     @StringRes val strRes: Int,
 ) {
     CN(R.string.china),
@@ -84,19 +85,23 @@ fun HomeScreen() {
     var showAboutInfoDialog by remember { mutableStateOf(false) }
 
     var otaVersion by rememberSaveable { mutableStateOf(simpleSystemOtaVersion) }
-    var otaZone by rememberSaveable { mutableStateOf(OtaZone.CN) }
+    var otaRegion by rememberSaveable { mutableStateOf(OtaRegion.CN) }
     var proxy by rememberSaveable { mutableStateOf("") }
-    var response by rememberSaveable { mutableStateOf<ByteArray?>(null) }
-    val errMsgFlow = MutableSharedFlow<String>()
+    var responseResult by rememberSaveable { mutableStateOf<ResponseResult?>(null) }
+    val msgFlow = MutableSharedFlow<String>()
 
-    LaunchedEffect(errMsgFlow) {
-        errMsgFlow.collectLatest {
-            withContext(Dispatchers.Main) {
-                if (it.contains("code: 304")) {
-                    context.toast(R.string.msg_no_update_available)
-                } else {
-                    context.toast(it)
-                }
+    LaunchedEffect(msgFlow) {
+        msgFlow.collectLatest {
+            withContext(Dispatchers.Main) { context.toast(it) }
+        }
+    }
+
+    LaunchedEffect(responseResult) {
+        responseResult?.run {
+            when (responseCode.toInt()) {
+                200 -> msgFlow.emit(context.getString(R.string.msg_query_success))
+                304 -> msgFlow.emit(context.getString(R.string.msg_no_update_available))
+                else -> msgFlow.emit("code: $responseCode, $errMsg")
             }
         }
     }
@@ -146,28 +151,27 @@ fun HomeScreen() {
             ) {
                 SuperDropdown(
                     title = stringResource(R.string.region),
-                    items = OtaZone.entries.map { stringResource(it.strRes) },
-                    selectedIndex = OtaZone.entries.indexOf(otaZone)
+                    items = OtaRegion.entries.map { stringResource(it.strRes) },
+                    selectedIndex = OtaRegion.entries.indexOf(otaRegion)
                 ) {
-                    otaZone = OtaZone.entries[it]
+                    otaRegion = OtaRegion.entries[it]
                 }
             }
 
             Button(
                 onClick = {
                     focusManager.clearFocus()
-                    val attr = updater.Attribute().also {
-                        it.otaVer = otaVersion
-                        it.zone = otaZone.name
-                        it.proxyStr = proxy
+                    val args = updater.QueryUpdateArgs().also {
+                        it.otaVersion = otaVersion
+                        it.region = otaRegion.name
+                        it.proxy = proxy
                     }
-                    coroutineScope.launch {
+                    coroutineScope.launch(Dispatchers.IO) {
                         try {
-                            response = null
-                            response = queryUpdaterRawBytes(attr).takeIf { it.isNotEmpty() }
-                            errMsgFlow.emit(context.getString(R.string.msg_query_success))
+                            responseResult = null
+                            responseResult = Updater.queryUpdate(args)
                         } catch (e: Exception) {
-                            errMsgFlow.emit(e.message ?: e.stackTraceToString())
+                            msgFlow.emit(e.message ?: e.stackTraceToString())
                         }
                     }
                 },
@@ -186,8 +190,8 @@ fun HomeScreen() {
                 )
             }
 
-            AnimatedVisibility(visible = response != null) {
-                response?.let { UpdateQueryResponseCard(it) }
+            AnimatedVisibility(visible = responseResult != null) {
+                responseResult?.let { UpdateQueryResponseCard(it) }
             }
 
             if (showAboutInfoDialog) {
