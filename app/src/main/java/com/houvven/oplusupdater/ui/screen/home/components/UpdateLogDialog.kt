@@ -29,7 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +52,7 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.BackHandler
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -65,7 +66,7 @@ fun UpdateLogDialog(
     onDismissRequest: () -> Unit
 ) {
     val isDarkTheme = isSystemInDarkTheme()
-    var responseHtml by remember { mutableStateOf("") }
+    var responseHtml by rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect(url) {
         launch(Dispatchers.IO) {
@@ -81,7 +82,7 @@ fun UpdateLogDialog(
 
     Popup(
         onDismissRequest = onDismissRequest,
-        properties = PopupProperties(excludeFromSystemGesture = true)
+        properties = PopupProperties(excludeFromSystemGesture = false)
     ) {
         AnimatedVisibility(
             visible = show,
@@ -94,6 +95,8 @@ fun UpdateLogDialog(
                 animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)
             ) + fadeOut()
         ) {
+            BackHandler(show, onDismissRequest)
+
             Box(
                 modifier = Modifier
                     .fillMaxSize(),
