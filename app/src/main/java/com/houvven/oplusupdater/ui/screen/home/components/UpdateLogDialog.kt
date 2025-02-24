@@ -5,6 +5,13 @@ import android.util.Log
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.annotation.Keep
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -35,8 +42,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
 import com.houvven.oplusupdater.R
 import kotlinx.coroutines.Dispatchers
@@ -72,87 +79,96 @@ fun UpdateLogDialog(
         }
     }
 
-    if (!show) {
-        return
-    }
-    Dialog(
+    Popup(
         onDismissRequest = onDismissRequest,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        properties = PopupProperties(excludeFromSystemGesture = true)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.BottomCenter
+        AnimatedVisibility(
+            visible = show,
+            enter = slideInVertically(
+                initialOffsetY = { fullHeight -> fullHeight },
+                animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)
+            ) + fadeIn(),
+            exit = slideOutVertically(
+                targetOffsetY = { fullHeight -> fullHeight },
+                animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)
+            ) + fadeOut()
         ) {
-            Column(
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-                    .background(if (isDarkTheme) Color(0xFF404040) else Color(0xFFFAFAFA)),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                    .fillMaxSize(),
+                contentAlignment = Alignment.BottomCenter
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 26.dp)
-                        .padding(top = 24.dp)
-                        .zIndex(1f),
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                        .background(if (isDarkTheme) Color(0xFF404040) else Color(0xFFFAFAFA)),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text(
-                        text = stringResource(R.string.software_version),
-                        style = TextStyle(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.W500,
-                            color = MiuixTheme.colorScheme.onSurface
-                        )
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = softwareVersion,
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.W500,
-                            color = if (isDarkTheme) Color.Gray else Color.DarkGray
-                        )
-                    )
-
-                    Box(
+                    Column(
                         modifier = Modifier
-                            .padding(vertical = 16.dp)
-                            .height((0.5).dp)
                             .fillMaxWidth()
-                            .background(MiuixTheme.colorScheme.dividerLine)
+                            .padding(horizontal = 26.dp)
+                            .padding(top = 24.dp)
+                            .zIndex(1f),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.software_version),
+                            style = TextStyle(
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.W500,
+                                color = MiuixTheme.colorScheme.onSurface
+                            )
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = softwareVersion,
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.W500,
+                                color = if (isDarkTheme) Color.Gray else Color.DarkGray
+                            )
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .padding(vertical = 16.dp)
+                                .height((0.5).dp)
+                                .fillMaxWidth()
+                                .background(MiuixTheme.colorScheme.dividerLine)
+                        )
+                    }
+
+                    AndroidView(
+                        factory = {
+                            WebView(it).apply {
+                                setBackgroundColor(Color.Transparent.toArgb())
+                                // @formatter:off
+                                addJavascriptInterface(object { @JavascriptInterface @Keep @Suppress("unused") fun isNight(): Boolean = isDarkTheme }, "HeytapTheme")
+                                // @formatter:on
+                                settings.javaScriptEnabled = true
+                            }
+                        },
+                        update = {
+                            it.loadDataWithBaseURL(url, responseHtml, "text/html", "utf-8", null)
+                        }
                     )
                 }
 
-                AndroidView(
-                    factory = {
-                        WebView(it).apply {
-                            setBackgroundColor(Color.Transparent.toArgb())
-                            // @formatter:off
-                            addJavascriptInterface(object { @JavascriptInterface @Keep @Suppress("unused") fun isNight(): Boolean = isDarkTheme }, "HeytapTheme")
-                            // @formatter:on
-                            settings.javaScriptEnabled = true
-                        }
-                    },
-                    update = {
-                        it.loadDataWithBaseURL(url, responseHtml, "text/html", "utf-8", null)
-                    }
-                )
-            }
-
-            IconButton(
-                onClick = onDismissRequest,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(12.dp),
-                backgroundColor = MiuixTheme.colorScheme.secondaryContainer
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = null,
-                    tint = MiuixTheme.colorScheme.onSecondaryContainer
-                )
+                IconButton(
+                    onClick = onDismissRequest,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(12.dp),
+                    backgroundColor = MiuixTheme.colorScheme.secondaryContainer
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = null,
+                        tint = MiuixTheme.colorScheme.onSecondaryContainer
+                    )
+                }
             }
         }
     }
