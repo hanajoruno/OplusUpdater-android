@@ -40,8 +40,9 @@ jobs:
         working-directory: OplusUpdater
         run: |
           pwd
+          go get golang.org/x/mobile/bind
           gomobile init
-          gomobile bind -target=android -androidapi 26 -v ./pkg/updater
+          CGO_CFLAGS="-O2 -g0" CGO_LDFLAGS="-s" gomobile bind -tags "no_debug" -target=android -androidapi 26 -v ./pkg/updater
 
       - name: set up JDK 17
         uses: actions/setup-java@v4
@@ -55,16 +56,10 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew assemble
 
-      - name: Upload Release Build Artifact
+      - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: apk-files-release
-          path: app/build/outputs/apk/release
-          if-no-files-found: error
-
-      - name: Upload Debug Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: apk-files-debug
-          path: app/build/outputs/apk/debug
+          name: apps
+          path: app/build/outputs/apk/**/*.apk
+          overwrite: true
           if-no-files-found: error
