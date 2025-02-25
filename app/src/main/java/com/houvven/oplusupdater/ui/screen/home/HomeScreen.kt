@@ -92,7 +92,7 @@ fun HomeScreen() {
     var carrier by rememberSaveable { mutableStateOf("") }
     var otaRegion by rememberSaveable { mutableStateOf(OtaRegion.CN) }
     var proxy by rememberSaveable { mutableStateOf("") }
-    var responseResult by rememberSaveable { mutableStateOf<ResponseResult?>(null) }
+    var responseResult by remember { mutableStateOf<ResponseResult?>(null) }
     val msgFlow = MutableSharedFlow<String>()
 
     LaunchedEffect(msgFlow) {
